@@ -1,0 +1,17 @@
+# ─── Dev-only Docker services ─────────────────────────────────────────────────
+# This file is used by dev.sh to spin up Redis locally during development.
+# In production, Redis is provided by Upstash — no Docker needed there.
+
+services:
+  redis:
+    image: redis:7
+    container_name: heatchat-redis
+    ports:
+      - "6379:6379"           # Exposed so the server can reach it at localhost:6379
+    command: redis-server --loglevel warning
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

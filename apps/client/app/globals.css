@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Dark theme (default) ─────────────────────────────────────────────────── */
+:root, .dark {
+  --color-bg:             #111114;
+  --color-surface:        #18181C;
+  --color-elevated:       #222228;
+  --color-border:         #2E2E36;
+  --color-accent:         #FF6B55;
+  --color-accent-dark:    #E55A44;
+  --color-text-primary:   #F0F0F4;
+  --color-text-secondary: #8A8A9A;
+  --color-text-muted:     #4A4A5A;
+}
+
+/* ── Light theme ──────────────────────────────────────────────────────────── */
+.light {
+  --color-bg:             #F4F3F0;
+  --color-surface:        #FFFFFF;
+  --color-elevated:       #ECEAE6;
+  --color-border:         #DDDBD6;
+  --color-accent:         #FF6B55;
+  --color-accent-dark:    #E55A44;
+  --color-text-primary:   #1A1A1C;
+  --color-text-secondary: #5C5C6E;
+  --color-text-muted:     #9A9AAA;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar        { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 99px; }
+
+  ::selection { background: #FF6B5530; color: var(--color-text-primary); }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}

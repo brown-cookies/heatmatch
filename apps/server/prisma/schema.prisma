@@ -1,0 +1,11 @@
+// Database removed — reports, analytics, and universities are now handled
+// without persistence. Add models back here when you're ready to re-introduce a DB.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
