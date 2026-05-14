@@ -252,15 +252,18 @@ async function handleLeaveRoom(
     await removeFromQueue(entry);
 
     if (requeue) {
-      entry.queuedAt = Date.now();
+      // Use a fresh object so the old serialized form in Redis is never aliased
+      // to the new enqueue — prevents lrem ghost-entry bugs on removal.
+      const requeuedEntry: QueueEntry = { ...entry, queuedAt: Date.now() };
+      state.entry = requeuedEntry;
       const newRelaxer = new Relaxer(socket, async (stage) => {
-        await tryMatch(io, socket, entry, stage);
+        await tryMatch(io, socket, requeuedEntry, stage);
       });
       state.relaxer = newRelaxer;
-      await addToQueue(entry);
+      await addToQueue(requeuedEntry);
       newRelaxer.start();
       socket.emit("queue_status", { message: "Looking for someone...", stage: 0 });
-      await tryMatch(io, socket, entry, 0);
+      await tryMatch(io, socket, requeuedEntry, 0);
     } else {
       socketState.delete(socket.id);
     }

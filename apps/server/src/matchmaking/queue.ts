@@ -52,20 +52,32 @@ const sessionKey = (sessionId: string) => `session:${sessionId}`;
 
 export async function addToQueue(entry: QueueEntry): Promise<void> {
   const key = queueKey(entry.vibe);
-  await redis.lpush(key, JSON.stringify(entry));
+  const serialized = JSON.stringify(entry);
+  await redis.lpush(key, serialized);
+  // Store the serialized form so we can do an exact lrem later,
+  // even if the in-memory entry object gets mutated after enqueue.
   await redis.hset(sessionKey(entry.sessionId), {
-    socketId: entry.socketId,
-    vibe:     entry.vibe,
-    queuedAt: entry.queuedAt,
+    socketId:   entry.socketId,
+    vibe:       entry.vibe,
+    queuedAt:   entry.queuedAt,
+    serialized, // ← persist the exact string that was pushed
   });
   await redis.expire(sessionKey(entry.sessionId), 600);
 }
 
 // ─── Remove from queue ────────────────────────────────────────────────────────
+// Uses the serialized string stored at enqueue time so that any later mutation
+// of the in-memory entry object (e.g. queuedAt reset on requeue) doesn't cause
+// lrem to silently miss and leave a ghost entry in Redis.
 
 export async function removeFromQueue(entry: QueueEntry): Promise<void> {
   const key = queueKey(entry.vibe);
-  await redis.lrem(key, 0, JSON.stringify(entry));
+
+  // Prefer the originally-stored serialized form for an exact lrem match.
+  const session = await redis.hgetall(sessionKey(entry.sessionId));
+  const serialized = session?.serialized ?? JSON.stringify(entry);
+
+  await redis.lrem(key, 0, serialized);
   await redis.del(sessionKey(entry.sessionId));
 }
 
